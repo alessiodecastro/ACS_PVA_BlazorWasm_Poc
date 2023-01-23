@@ -1,0 +1,59 @@
+﻿@page "/callTest"
+@inject IACSService AcsService
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JS
+@implements IAsyncDisposable
+
+
+<div @ref="callCompositeContainer" class="call-composite-container"></div>
+
+@code {
+
+    string token = string.Empty;
+    string userId = string.Empty;
+
+    private ElementReference callCompositeContainer;
+    private IJSObjectReference? callCompositeModule;
+    private IJSObjectReference? callCompositeInstance;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var acsUserToken = await AcsService.GetUserIdWithToken();
+
+            token = acsUserToken.Token.Token;
+            userId = acsUserToken.User.UserId;
+
+            callCompositeModule = await JS.InvokeAsync<IJSObjectReference>("import", "./scripts/acsCallBundle/app-call.js");
+            callCompositeInstance = await callCompositeModule.InvokeAsync<IJSObjectReference>("loadCallComposite", userId, token, callCompositeContainer);
+
+        }
+    }
+
+    async ValueTask IAsyncDisposable.DisposeAsync()
+    {
+        try
+        {
+            if (callCompositeInstance is not null)
+            {
+                await callCompositeInstance.DisposeAsync();
+            }
+
+            if (callCompositeModule is not null)
+            {
+                await callCompositeModule.DisposeAsync();
+            }
+        }
+        catch (JSDisconnectedException)
+        {
+        }
+
+    }
+}
