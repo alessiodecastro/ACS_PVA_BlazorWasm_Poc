@@ -10,6 +10,7 @@ namespace ACS_PVA_BlazorWasm_Poc.Shared
     {
         public UserIdentity User { get; set; }
         public AccessToken Token { get; set; }
+        public string CallId { get; set; }
 
         public class UserIdentity
         {

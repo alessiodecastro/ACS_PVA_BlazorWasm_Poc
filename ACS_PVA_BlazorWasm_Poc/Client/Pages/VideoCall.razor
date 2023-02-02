@@ -1,4 +1,4 @@
-﻿@page "/callTest"
+﻿@page "/videoCall/{callId}"
 @inject IACSService AcsService
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JS
@@ -9,13 +9,15 @@
 
 @code {
 
+    [Parameter]
+    public string CallId { get; set; }
+
     string token = string.Empty;
     string userId = string.Empty;
 
     private ElementReference callCompositeContainer;
     private IJSObjectReference? callCompositeModule;
     private IJSObjectReference? callCompositeInstance;
-
 
     protected override async Task OnInitializedAsync()
     {
@@ -32,8 +34,7 @@
             userId = acsUserToken.User.UserId;
 
             callCompositeModule = await JS.InvokeAsync<IJSObjectReference>("import", "./scripts/acsCallBundle/app-call.js");
-            callCompositeInstance = await callCompositeModule.InvokeAsync<IJSObjectReference>("loadCallComposite", userId, token, callCompositeContainer);
-
+            callCompositeInstance = await callCompositeModule.InvokeAsync<IJSObjectReference>("loadCallComposite", userId, token, CallId, "Back Office Operator", callCompositeContainer);
         }
     }
 
@@ -54,6 +55,5 @@
         catch (JSDisconnectedException)
         {
         }
-
     }
 }

@@ -1,0 +1,133 @@
+﻿@page "/WebChat"
+@inject IACSService AcsService
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JS
+@implements IAsyncDisposable
+
+<button class="chatbox-open">
+    <div class="pulsating-circle"></div>
+    <i class="fa fa-comment fa-2x" aria-hidden="true"></i>
+</button>
+<button class="chatbox-close">
+    <i class="fa fa-close fa-2x" aria-hidden="true"></i>
+</button>
+<section class="chatbox-popup draggable">
+    <header class="chatbox-popup__header">
+        <aside id="header-avatar" style="flex:2">
+            <div class='icon-container'>
+                <img src="/images/bot_avatar.png" />
+                <div class='status-circle'>
+                </div>
+            </div>
+        </aside>
+        <aside style="flex:8">
+            <h1>Virtual Assistant</h1>
+        </aside>
+        <aside style="flex:3;text-align:right;">
+            <button title="Ingrandisci" class="chatbox-maximize">
+                <i class="fa fa-window-maximize"
+                   style="font-size: 18px;" aria-hidden="true"></i>
+            </button>
+            <button title="Riduci" class="chatbox-minimize" style="display: none;">
+                <i class="fa fa-window-restore"
+                   style="font-size: 18px;" aria-hidden="true"></i>
+            </button>
+            <button title="Chiudi" class="chatbox-panel-close">
+                <i class="fa fa-close" style="font-size: 21px;"
+                   aria-hidden="true"></i>
+            </button>
+        </aside>
+    </header>
+
+    <main class="chatbox-popup__main">
+        <div class="alert">
+            <div class="alert-icon">
+                <i class="fa fa-bell-o"></i>
+            </div>
+            <div class="alert-body">
+                Pursuant to the privacy code, we inform you that all personal data concerning you will be
+                processed exclusively for the purposes of the service
+                and in compliance with the provisions of the law. A more informative detailed is consultable <a href="" target="blank">here</a>.
+                <br /><br />
+                <button class="alert-button js-messageClose">Agree with policy statement</button>
+            </div>
+        </div>
+
+        <div @ref="webChatCompositeContainer" class="webchat" role="main"></div>
+    </main>
+</section>
+
+
+<div @ref="callCompositeContainer" class="call-composite-container"></div>
+
+
+@code {
+    string token = string.Empty;
+    string userId = string.Empty;
+
+    private ElementReference webChatCompositeContainer;
+    private ElementReference callCompositeContainer;
+    private IJSObjectReference? webChatCompositeModule;
+    private IJSObjectReference? callCompositeModule;
+    private IJSObjectReference? callCompositeInstance;
+
+    private static Func<string, Task> RenderVideoCallActionAsync;
+
+    private async Task RenderVideoCallContentValue(string callId)
+    {
+        var acsUserToken = await AcsService.GetUserIdWithToken();
+
+        if (acsUserToken == null)
+            return;
+
+        token = acsUserToken.Token.Token;
+        userId = acsUserToken.User.UserId;
+        callCompositeModule = await JS.InvokeAsync<IJSObjectReference>("import", "./scripts/acsCallBundle/app-call.js");
+        callCompositeInstance = await callCompositeModule.InvokeAsync<IJSObjectReference>("loadCallComposite", userId, token, acsUserToken.CallId, "Customer", callCompositeContainer);
+    }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        RenderVideoCallActionAsync = RenderVideoCallContentValue;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            webChatCompositeModule = await JS.InvokeAsync<IJSObjectReference>("import", "./scripts/webChat/app-webchat.js");
+            await webChatCompositeModule.InvokeVoidAsync("loadWebChatComposite", webChatCompositeContainer);
+        }
+    }
+
+    [JSInvokableAttribute("renderVideoCall")]
+    public static async Task RenderVideoCall(string callId)
+    {
+        await RenderVideoCallActionAsync?.Invoke(callId);
+    }
+
+    async ValueTask IAsyncDisposable.DisposeAsync()
+    {
+        try
+        {
+            if (webChatCompositeModule is not null)
+            {
+                await webChatCompositeModule.DisposeAsync();
+            }
+
+            if (callCompositeInstance is not null)
+            {
+                await callCompositeInstance.DisposeAsync();
+            }
+
+            if (callCompositeModule is not null)
+            {
+                await callCompositeModule.DisposeAsync();
+            }
+        }
+        catch (JSDisconnectedException)
+        {
+        }
+    }
+}

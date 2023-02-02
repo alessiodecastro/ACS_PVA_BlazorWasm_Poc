@@ -41,7 +41,8 @@ namespace ACS_PVA_BlazorWasm_Poc.Server.Services.ACS_Service
                 {
                     Token = tokenResponse.Value.Token,
                     ExpiresOn = tokenResponse.Value.ExpiresOn.Date
-                }
+                },
+                CallId = "31fbdc99-0d76-42ef-aafa-15684d199717" //just for testing mock //Guid.NewGuid().ToString(), 
             };
         }
     }

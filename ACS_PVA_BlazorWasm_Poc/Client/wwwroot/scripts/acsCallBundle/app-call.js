@@ -1,15 +1,14 @@
 ﻿import './callComposite.js';
 
 
-export function loadCallComposite(userId, token, element) {
+export function loadCallComposite(userId, token, callId, actorName, element) {
     return callComposite.loadCallComposite(
         {
-            locator: { groupId: "dbef0e8b-7e79-4c00-93d4-5f2c3ac1cc8b" }, // Provide any GUID to join a group
-            displayName: "Alex",
-            userId: { communicationUserId: userId }, // Object { communicationUserId: string }
+            locator: { groupId: callId }, // The GUID identifier to join a group call
+            displayName: actorName,
+            userId: { communicationUserId: userId },
             token: token,
         },
         element
     );
 }
-

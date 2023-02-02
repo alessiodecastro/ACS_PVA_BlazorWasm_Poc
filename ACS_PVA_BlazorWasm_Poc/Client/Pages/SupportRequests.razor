@@ -1,0 +1,69 @@
+﻿@page "/SupportRequests"
+@inject NavigationManager NavigationManager
+
+<h3 style="padding-top: 30px">Incoming Support Requests</h3>
+<br />
+
+<MudTable Items="@Elements.Take(4)" Hover="true" Breakpoint="Breakpoint.Sm" Loading="@_loading" LoadingProgressColor="Color.Info">
+    <HeaderContent>
+        <MudTh>Nr</MudTh>
+        <MudTh>Conversation Id</MudTh>
+        <MudTh>Customer</MudTh>
+        <MudTh>Last Conversation Topic</MudTh>
+        <MudTh>Action</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Nr">#@context.Number</MudTd>
+        <MudTd DataLabel="Conversation Id">@context.ConversationId</MudTd>
+        <MudTd DataLabel="Customer">@context.Customer</MudTd>
+        <MudTd DataLabel="Last Conversation Topic">@context.LastTopic</MudTd>
+        <MudTd DataLabel="Join Call">
+
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="@(() => NavigationManager.NavigateTo($"/videoCall/{context.RoomId}"))">Take Call</MudButton>
+
+        </MudTd>
+    </RowTemplate>
+</MudTable>
+
+
+@code {
+    private bool _hidePosition;
+    private bool _loading;
+    private IEnumerable<dynamic> Elements = new List<dynamic>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        //just for Demo/PoC purposes - to implement for production use cases
+        Elements = new List<dynamic>
+        {
+            new {
+            Number = "1",
+            ConversationId = "fc0780ef-7d0b-4bf1-8750-a6a331f69089",
+            Customer = "Alessio De Castro",
+            LastTopic = "Abbonamento",
+            RoomId = "31fbdc99-0d76-42ef-aafa-15684d199717"
+            },
+            new {
+            Number = "2",
+            ConversationId = "160235f1-c442-4b34-81aa-7d5e62e18c37",
+            Customer = "Mario Rossi",
+            LastTopic = "Fatturazione",
+            RoomId = Guid.NewGuid().ToString()
+            },
+            new {
+            Number = "3",
+            ConversationId = "bacc9356-1af4-43ed-9270-0d4f027d01ea",
+            Customer = "Giuseppe Verdi",
+            LastTopic = "Credenziali Accesso",
+            RoomId = Guid.NewGuid().ToString()
+            },
+            new {
+            Number = "4",
+            ConversationId = "08383c81-b2d7-481a-830b-587d040a2009",
+            Customer = "Antonio Bianchi",
+            LastTopic = "Offerte",
+            RoomId = Guid.NewGuid().ToString()
+            },
+        };
+    }
+}
