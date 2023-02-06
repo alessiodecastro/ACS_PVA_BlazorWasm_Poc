@@ -1,6 +1,6 @@
 # Welcome to Demo App ACS - Virtual Agent!
 
-This is a demo app with several number of missing feature implementations. Before to run please add into the project "ACS_PVA_BlazorWasm_Poc.Server" file "appsettings.json" the connection string for Azure Communication Services:
+This is just a demo app - no production ready - with several number of missing feature implementations. Before to run please add into the project "ACS_PVA_BlazorWasm_Poc.Server" file "appsettings.json" the connection string for Azure Communication Services:
 
     "AzureCommunicationServices": {
         "ConnectionString": "endpoint=https://..."
